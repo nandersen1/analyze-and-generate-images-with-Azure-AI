@@ -1,28 +1,44 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
+import analyzeImage from './azure-image-analysis';
 
 function App() {
-  const [inputValue, setInputValue] = useState('');
+  const [imageUrl, setImageUrl] = useState("");
+  const [result, setResult] = useState(null)
 
-  const handleInputChange = (event) => {
-    setInputValue(event.target.value);
+  const handleImageAnalysis = async () => {
+    try {
+      const analysisResult = await analyzeImage(imageUrl);
+      setResult(analysisResult);
+    } catch (error) {
+      console.error("Error analyzing",error);
+    }
   };
 
-  const handleButtonAction = (action) => {
-    // Hier können Sie den Code für die gewählte Aktion (Bildanalyse/Bildgenerierung) hinzufügen
-    // Verwenden Sie dazu den Wert in der 'inputValue'-State-Variable
-    console.log(`Insert URL or type prompt '${action}' auslösen: ${inputValue}`);
+  const displayResults = () => {
+    if (!result) return null;
+    return <div>
+      <h2>Image results</h2>
+      <img 
+        width="500"
+        src={result?.url ? result.url : imageUrl}
+        alt="uploaded"
+      ></img>
+      <pre>{JSON.stringify(result, null, 2)}</pre>
+    </div>;
   };
 
   return (
     <div>
-      <h1>Computer vision</h1>
-      <label>
-      <div>Insert URL or type prompt:</div>
-        <input type="text" value={inputValue} onChange={handleInputChange} />
-      </label>
-      <br />
-      <button onClick={() => handleButtonAction('Bildanalyse')}>Analyze</button>
-      <button onClick={() => handleButtonAction('Bildgenerierung')}>Generate</button>
+      <h1>Analyze and generate images</h1>
+      <input 
+      type="text" 
+      placeholder="Enter URL or textual prompt"
+      value={imageUrl}
+      onChange={(event) => setImageUrl(event.target.value)}
+      ></input>
+      <button onClick={handleImageAnalysis}>Analyze Image</button>
+      <button>Generate Image</button>
+      {displayResults()}
     </div>
   );
 }
